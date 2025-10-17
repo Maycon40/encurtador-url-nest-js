@@ -16,9 +16,17 @@ describe('API status (e2e)', () => {
     await app.init();
   });
 
-  it('/api/v1/status (GET)', () => {
-    return request(app.getHttpServer())
+  it('/api/v1/status (GET)', async () => {
+    const response = await request(app.getHttpServer())
       .get('/api/v1/status')
       .expect(200)
+
+    const responseBody = await response.body
+
+    console.log("responseBody", responseBody)
+
+    expect(responseBody.dependencies.version.includes('16.10')).toBe(true);
+    expect(responseBody.dependencies.max_connections).toBe(100);
+    expect(responseBody.dependencies.used_connections).toEqual(1);
   });
 });
