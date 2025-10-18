@@ -1,0 +1,17 @@
+POST http://localhost:3000/shorten
+Content-Type: application/json
+
+{
+  "original_url": "https://github.com/Maycon40/encurtador-url-nest-js"
+}
+
+###
+PUT http://localhost:3000/02c45c2f
+Content-Type: application/json
+
+{
+  "original_url": "https://github.com/Maycon40/encurtador-url"
+}
+
+###
+DELETE http://localhost:3000/02c45c2f
