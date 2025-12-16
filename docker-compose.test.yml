@@ -4,7 +4,7 @@ services:
     container_name: postgres_db
     restart: always
     env_file:
-      - .env
+      - env.test
     ports:
       - "${POSTGRES_PORT}:5432"
     healthcheck:
