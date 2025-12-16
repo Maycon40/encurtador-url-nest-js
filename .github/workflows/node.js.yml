@@ -5,13 +5,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,21 +19,43 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Install
-      run: npm install
+      - name: Start database
+        run: docker compose -f docker-compose.test.yml up -d
 
-    - name: Lint
-      run: npm run lint
-    
-    - name: Build
-      run: npm run build --if-present
+      - name: Debug DB port
+        run: |
+          docker ps
+          docker port postgres_db
 
-    - name: Test
-      run: npm test
+      - name: Wait for Postgres
+        run: |
+          echo "Waiting for Postgres..."
+          for i in {1..10}; do
+            if docker exec postgres_db pg_isready -h localhost -p 5432 -U test; then
+              echo "Postgres is accepting connections"
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "Postgres did not become ready in time"
+          docker logs postgres_db
+          exit 1
+
+      - name: Install
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Test
+        run: ENV_FILE=env.test npm test
