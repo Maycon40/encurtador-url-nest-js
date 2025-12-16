@@ -4,6 +4,14 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
+interface StatusResponse {
+  dependencies: {
+    version: string;
+    max_connections: number;
+    used_connections: number;
+  };
+}
+
 describe('API status (e2e)', () => {
   let app: INestApplication<App>;
 
@@ -19,11 +27,11 @@ describe('API status (e2e)', () => {
   it('/api/v1/status (GET)', async () => {
     const response = await request(app.getHttpServer())
       .get('/api/v1/status')
-      .expect(200)
+      .expect(200);
 
-    const responseBody = await response.body
+    const responseBody = (await response.body) as StatusResponse;
 
-    console.log("responseBody", responseBody)
+    console.log('responseBody', responseBody);
 
     expect(responseBody.dependencies.version.includes('16.10')).toBe(true);
     expect(responseBody.dependencies.max_connections).toBe(100);

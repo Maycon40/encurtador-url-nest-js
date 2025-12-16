@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import type { Response, Request } from 'express';
 import crypto from 'crypto';
 
 import database from '../infra/database';
+
+interface ReadData {
+  original_url: string;
+}
+
+interface StaticData {
+  short_code: string;
+}
 
 @Injectable()
 export class ShortenerService {
@@ -9,18 +18,18 @@ export class ShortenerService {
     return crypto.randomBytes(4).toString('hex');
   }
 
-  async static(req, code: string) {
+  async static(req: Request, code: string) {
     const result = await database.query({
       text: 'SELECT short_code, original_url, clicks, created_at, expires_at FROM urls WHERE short_code = $1',
       values: [code],
     });
 
-    const data = result.rows[0];
+    const data = result?.rows[0] as StaticData;
 
-    if (!data || !data["short_code"]) {
+    if (!data || !data['short_code']) {
       return {
-        'error': 'The code is not valid!'
-      }
+        error: 'The code is not valid!',
+      };
     }
 
     return {
@@ -29,7 +38,7 @@ export class ShortenerService {
     };
   }
 
-  async create(req, originalUrl: string) {
+  async create(req: Request, originalUrl: string) {
     const code = this.generateCode();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -40,24 +49,24 @@ export class ShortenerService {
 
     return {
       short_url: `${req.protocol}://${req.get('host')}/${code}`,
-      code
+      code,
     };
   }
 
-  async read(res, code: string) {
+  async read(res: Response, code: string) {
     const result = await database.query({
       text: 'SELECT short_code, original_url, clicks, created_at, expires_at FROM urls WHERE short_code = $1',
       values: [code],
     });
 
-    const data = result.rows[0];
+    const data = result?.rows[0] as ReadData;
 
     if (data && data['original_url']) {
       if (new Date() > data['expires_at']) {
         return res.status(401).json({ error: 'Este link expirou!' });
       }
 
-      database.query({
+      await database.query({
         text: 'UPDATE urls SET clicks = clicks + 1 WHERE short_code = $1',
         values: [code],
       });
@@ -65,12 +74,10 @@ export class ShortenerService {
       return res.status(302).redirect(data['original_url']);
     }
 
-    return res
-      .status(404)
-      .json({ error: 'Could not find shortened link!' });
+    return res.status(404).json({ error: 'Could not find shortened link!' });
   }
 
-  async update(req, originalUrl: string, code: string) {
+  async update(req: Request, originalUrl: string, code: string) {
     await database.query({
       text: 'UPDATE urls SET original_url = $1 WHERE short_code = $2',
       values: [originalUrl, code],
@@ -85,11 +92,11 @@ export class ShortenerService {
   async delete(code: string) {
     await database.query({
       text: 'DELETE FROM urls WHERE short_code = $1 RETURNING *',
-      values: [code]
-    })
+      values: [code],
+    });
 
     return {
-      message: 'Shortened link deleted!'
+      message: 'Shortened link deleted!',
     };
   }
 }

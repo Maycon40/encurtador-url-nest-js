@@ -2,9 +2,9 @@
   "name": "encurtador-url-nest-js",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "Maycon",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "server": "npm run database:up && npm run start:dev",
     "build": "nest build",

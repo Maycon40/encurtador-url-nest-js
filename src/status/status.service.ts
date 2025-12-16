@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
-import database from "../infra/database";
+import database from '../infra/database';
+
+interface VersionResult {
+  server_version: string;
+}
+
+interface MaxConnectionsResult {
+  max_connections: string;
+}
+
+interface UsedConnectionsResult {
+  count: number;
+}
 
 @Injectable()
 export class StatusService {
@@ -15,9 +27,11 @@ export class StatusService {
       values: [databaseName],
     });
 
-    const { server_version: version } = versionResult.rows[0];
-    const { max_connections: maxConnections } = maxConnectionsResult.rows[0];
-    const { count: usedConnections } = usedConnectionsResult.rows[0];
+    const { server_version: version } = versionResult?.rows[0] as VersionResult;
+    const { max_connections: maxConnections } = maxConnectionsResult
+      ?.rows[0] as MaxConnectionsResult;
+    const { count: usedConnections } = usedConnectionsResult
+      ?.rows[0] as UsedConnectionsResult;
 
     return {
       updated_at: updatedAt,

@@ -9,7 +9,7 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 
 import { ShortenerService } from './shortener.service';
 
@@ -18,7 +18,7 @@ interface Code {
 }
 
 interface CreateBody {
-  original_url;
+  original_url: string;
 }
 
 @Controller()
@@ -42,7 +42,8 @@ export class ShortenerController {
 
   @Get('/:code')
   async getShortener(@Res() res: Response, @Param() params: Code) {
-    return await this.shortnerService.read(res, params['code']);
+    const result = await this.shortnerService.read(res, params['code']);
+    return result;
   }
 
   @Put('/:code')
@@ -60,7 +61,7 @@ export class ShortenerController {
 
   @Delete('/:code')
   deleteShortener(@Param() params: Code) {
-    console.log("params", params)
+    console.log('params', params);
     return this.shortnerService.delete(params['code']);
   }
 }

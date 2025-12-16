@@ -28,7 +28,7 @@ export class ShortenerModule implements NestModule {
       .apply(UrlMiddleware)
       .forRoutes(
         { path: 'shorten', method: RequestMethod.POST },
-        { path: ':code', method: RequestMethod.PUT }
-      )
+        { path: ':code', method: RequestMethod.PUT },
+      );
   }
 }

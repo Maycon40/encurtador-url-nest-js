@@ -1,5 +1,9 @@
 import { Client } from 'pg';
 
+interface QueryData {
+  rows: Array<any>;
+}
+
 async function query(queryObject) {
   const host = process.env.POSTGRES_HOST;
   const user = process.env.POSTGRES_USER;
@@ -13,20 +17,22 @@ async function query(queryObject) {
     password,
     database,
     port: postgresPort,
-    ssl: ['development', 'test'].includes(process.env.NODE_ENV || "") ? false : true,
-  })
+    ssl: ['development', 'test'].includes(process.env.NODE_ENV || '')
+      ? false
+      : true,
+  });
 
   try {
     await client.connect();
-    const result = await client.query(queryObject);
-    return result
+    const result = (await client.query(queryObject)) as QueryData;
+    return result;
   } catch (error) {
-    console.error("Erro", error)
+    console.error('Erro', error);
   } finally {
     await client.end();
   }
 }
 
 export default {
-  query
-}
+  query,
+};
