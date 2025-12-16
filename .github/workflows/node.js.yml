@@ -37,7 +37,7 @@ jobs:
               echo "Postgres is accepting connections"
               exit 0
             fi
-            sleep 5
+            sleep 30
           done
           echo "Postgres did not become ready in time"
           docker logs postgres_db
