@@ -31,7 +31,7 @@ jobs:
 
       - name: Wait for Postgres
         run: |
-          until docker exec postgres_test pg_isready -U test; do
+          until docker exec postgres pg_isready -U test; do
             sleep 2
           done
 
