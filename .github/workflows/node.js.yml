@@ -29,6 +29,11 @@ jobs:
       - name: Start database
         run: docker compose -f docker-compose.test.yml up -d
 
+      - name: Debug DB port
+        run: |
+          docker ps
+          docker port postgres_db
+
       - name: Wait for Postgres
         run: |
           echo "Waiting for Postgres..."
