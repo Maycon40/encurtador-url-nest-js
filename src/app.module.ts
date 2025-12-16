@@ -10,7 +10,7 @@ import { ShortenerModule } from './shortener/shortener.module';
     ShortenerModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.ENV_FILE || '.env',
     }),
   ],
 })
