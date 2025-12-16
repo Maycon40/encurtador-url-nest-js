@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Start database
-        run: npm run database:up
+        run: docker compose -f docker-compose.test.yml up -d
 
       - name: Wait for Postgres
         run: |
