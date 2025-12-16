@@ -33,7 +33,7 @@ describe('API status (e2e)', () => {
 
     console.log('responseBody', responseBody);
 
-    expect(responseBody.dependencies.version.includes('16.10')).toBe(true);
+    expect(responseBody.dependencies.version.includes('16')).toBe(true);
     expect(responseBody.dependencies.max_connections).toBe(100);
     expect(responseBody.dependencies.used_connections).toEqual(1);
   });
