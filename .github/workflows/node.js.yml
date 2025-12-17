@@ -10,6 +10,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
 
     strategy:
       matrix:
@@ -52,8 +59,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build --if-present
-
-      - name: Test
-        run: ENV_FILE=env.test npm test
