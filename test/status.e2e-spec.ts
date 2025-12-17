@@ -5,7 +5,9 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
 interface StatusResponse {
+  updated_at: string;
   dependencies: {
+    status: string;
     version: string;
     max_connections: number;
     used_connections: number;
@@ -33,6 +35,8 @@ describe('API status (e2e)', () => {
 
     console.log('responseBody', responseBody);
 
+    expect(responseBody.updated_at).toBeDefined();
+    expect(responseBody.dependencies.status).toBe('online');
     expect(responseBody.dependencies.version.includes('16')).toBe(true);
     expect(responseBody.dependencies.max_connections).toBe(100);
     expect(responseBody.dependencies.used_connections).toEqual(1);
