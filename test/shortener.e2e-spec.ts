@@ -50,6 +50,7 @@ describe('Shortener API (e2e)', () => {
         code: responseBody.code,
         original_url: 'https://www.google.com',
         short_url: `${baseUrl}/${responseBody.code}`,
+        clicks: 0,
         expires_at: responseBody.expires_at,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -70,7 +71,8 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody).toEqual({
         status_code: 404,
-        error: 'Could not find shortened link!',
+        error: 'NotFoundException',
+        message: 'Could not find shortened link!',
       });
     });
 
@@ -102,7 +104,8 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody).toEqual({
         status_code: 404,
-        error: 'Could not find shortened link!',
+        error: 'NotFoundException',
+        message: 'Could not find shortened link!',
       });
     });
 
@@ -182,7 +185,8 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody).toEqual({
         status_code: 404,
-        error: 'Could not find shortened link!',
+        error: 'NotFoundException',
+        message: 'Could not find shortened link!',
       });
     });
 
@@ -226,7 +230,8 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody).toEqual({
         status_code: 404,
-        error: 'Could not find shortened link!',
+        error: 'NotFoundException',
+        message: 'Could not find shortened link!',
       });
     });
 
@@ -249,7 +254,9 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody).toEqual({
         status_code: 200,
-        message: 'Shortened link deleted!',
+        code: createdCode,
+        original_url: 'https://www.google.com',
+        short_url: `${baseUrl}/${createdCode}`,
       });
     });
 
@@ -272,7 +279,9 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody).toEqual({
         status_code: 200,
-        message: 'Shortened link deleted!',
+        code: createdCode,
+        original_url: 'https://www.google.com',
+        short_url: `${baseUrl}/${createdCode}`,
       });
 
       const res2 = await fetch(`${baseUrl}/${createdCode}`, {
@@ -285,7 +294,8 @@ describe('Shortener API (e2e)', () => {
 
       expect(responseBody2).toEqual({
         status_code: 404,
-        error: 'Could not find shortened link!',
+        error: 'NotFoundException',
+        message: 'Could not find shortened link!',
       });
     });
   });
