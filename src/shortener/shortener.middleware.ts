@@ -11,6 +11,7 @@ export class CodeMiddleware implements NestMiddleware {
     if (!req.params || !req.params['code']) {
       return res.status(400).json({
         error: 'The param code is required!',
+        status_code: 400,
       });
     }
 
@@ -26,6 +27,14 @@ export class UrlMiddleware implements NestMiddleware {
     if (!body || !body.original_url) {
       return res.status(400).json({
         error: 'The param original url is required',
+        status_code: 400,
+      });
+    }
+
+    if (!/^https?:\/\/[^\s$.?#].[^\s]*$/.test(body.original_url)) {
+      return res.status(400).json({
+        error: 'The param original url is invalid',
+        status_code: 400,
       });
     }
 
