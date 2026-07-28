@@ -8,10 +8,11 @@ import {
 import { ShortenerController } from './shortener.controller';
 import { ShortenerService } from './shortener.service';
 import { CodeMiddleware, UrlMiddleware } from './shortener.middleware';
+import { ShortenerRepository } from './shortener.repository';
 
 @Module({
   controllers: [ShortenerController],
-  providers: [ShortenerService],
+  providers: [ShortenerService, ShortenerRepository],
 })
 export class ShortenerModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
