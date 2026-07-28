@@ -1,57 +1,71 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import crypto from 'crypto';
 
-import database from '../infra/database';
+import { ShortenerRepository } from './shortener.repository';
 
-interface ReadData {
-  original_url: string;
-}
-
-interface StaticData {
-  short_code: string;
-}
+export const MAX_GENERATE_CODE_RETRIES = 5;
+export const URL_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 @Injectable()
 export class ShortenerService {
-  private generateCode() {
+  constructor(private readonly shortenerRepository: ShortenerRepository) {}
+
+  private generateCode = () => {
     return crypto.randomBytes(6).toString('base64url');
+  };
+
+  private async generateAvailableCode() {
+    let attempts = 0;
+    let code = '';
+    let isCodeAvailable = false;
+
+    while (!isCodeAvailable && attempts < MAX_GENERATE_CODE_RETRIES) {
+      code = this.generateCode();
+      attempts++;
+
+      try {
+        await this.read(code);
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          isCodeAvailable = true;
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    if (!isCodeAvailable) {
+      throw new InternalServerErrorException(
+        'Failed to generate a unique short link. Please try again.',
+      );
+    }
+
+    return code;
   }
 
   async create(originalUrl: string, url: string) {
-    const code = this.generateCode();
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const code = await this.generateAvailableCode();
+
+    const expiresAt = new Date(Date.now() + URL_EXPIRATION_TIME);
     const shortUrl = `${url}/${code}`;
 
-    const existingLink = await this.read(code);
-
-    if (existingLink && existingLink['statusCode'] === 302) {
-      return {
-        statusCode: 400,
-        error: 'A link with this code already exists!',
-      };
-    }
-
-    const result: {
-      rows: Array<{
-        short_url: string;
-        code: string;
-        original_url: string;
-        expires_at: Date;
-        created_at: Date;
-        updated_at: Date;
-      }>;
-    } = await database.query({
-      text: 'INSERT INTO links (code, short_url, original_url, expires_at) VALUES ($1, $2, $3, $4) RETURNING *',
-      values: [code, shortUrl, originalUrl, expiresAt],
+    const createdLink = await this.shortenerRepository.create({
+      code,
+      short_url: shortUrl,
+      original_url: originalUrl,
+      expires_at: expiresAt,
     });
 
-    const createdLink = result?.rows[0];
-
     return {
-      statusCode: 201,
       code: createdLink?.code,
       original_url: createdLink?.original_url,
       short_url: createdLink?.short_url,
+      clicks: createdLink?.clicks,
       expires_at: createdLink?.expires_at,
       created_at: createdLink?.created_at,
       updated_at: createdLink?.updated_at,
@@ -59,86 +73,83 @@ export class ShortenerService {
   }
 
   async read(code: string) {
-    const result = await database.query({
-      text: 'SELECT * FROM links WHERE code = $1',
-      values: [code],
-    });
+    const link = await this.shortenerRepository.findByCode(code);
 
-    const data = result?.rows[0] as ReadData;
-
-    if (data && data['original_url']) {
-      if (new Date() > data['expires_at']) {
-        return { statusCode: 401, error: 'This link has expired!' };
-      }
-
-      await database.query({
-        text: 'UPDATE links SET clicks = clicks + 1 WHERE code = $1',
-        values: [code],
-      });
-
-      return { statusCode: 302, redirect: data['original_url'] };
+    if (!link) {
+      throw new NotFoundException('Could not find shortened link!');
     }
 
-    return { statusCode: 404, error: 'Could not find shortened link!' };
+    return link;
   }
 
-  async update(originalUrl: string, code: string) {
-    const result = await database.query({
-      text: 'UPDATE links SET original_url = $1 WHERE code = $2 RETURNING *',
-      values: [originalUrl, code],
-    });
+  async getRedirectUrl(code: string) {
+    const link = await this.read(code);
 
-    const updatedLink = result?.rows[0];
-
-    if (!updatedLink || !updatedLink['code']) {
-      return { statusCode: 404, error: 'Could not find shortened link!' };
+    if (new Date() > link.expires_at) {
+      throw new BadRequestException('This link has expired!');
     }
 
+    await this.shortenerRepository.incrementClicks(code);
+
+    return { redirect: link.original_url };
+  }
+
+  async update(
+    newLinkData: { code?: string; original_url?: string; expires_at?: Date },
+    code: string,
+  ) {
+    const currentLink = await this.read(code);
+
+    const short_url = newLinkData.code
+      ? `${currentLink.short_url?.split('/').slice(0, -1).join('/')}/${newLinkData.code}`
+      : currentLink.short_url;
+
+    const updatedLinkData = {
+      code: newLinkData.code || currentLink.code,
+      short_url: short_url,
+      original_url: newLinkData.original_url || currentLink.original_url,
+      expires_at: newLinkData.expires_at || currentLink.expires_at,
+    };
+
+    const updatedLink = await this.shortenerRepository.update(
+      code,
+      updatedLinkData,
+    );
+
     return {
-      statusCode: 200,
       code: updatedLink?.code,
       original_url: updatedLink?.original_url,
       short_url: updatedLink?.short_url,
+      clicks: updatedLink?.clicks,
+      expires_at: updatedLink?.expires_at,
+      created_at: updatedLink?.created_at,
+      updated_at: updatedLink?.updated_at,
     };
   }
 
   async delete(code: string) {
-    const result = await database.query({
-      text: 'DELETE FROM links WHERE code = $1 RETURNING *',
-      values: [code],
-    });
+    await this.read(code);
 
-    if (!result?.rows[0]) {
-      return { statusCode: 404, error: 'Could not find shortened link!' };
-    }
+    const deletedLink = await this.shortenerRepository.delete(code);
 
     return {
-      statusCode: 200,
-      message: 'Shortened link deleted!',
+      code: deletedLink?.code,
+      original_url: deletedLink?.original_url,
+      short_url: deletedLink?.short_url,
     };
   }
 
   async statistics(code: string) {
-    const result = await database.query({
-      text: 'SELECT * FROM links WHERE code = $1',
-      values: [code],
-    });
-
-    const data = result?.rows[0] as StaticData;
-
-    if (!data || !data['code']) {
-      return { statusCode: 404, error: 'Could not find shortened link!' };
-    }
+    const link = await this.read(code);
 
     return {
-      statusCode: 200,
-      short_url: data['short_url'],
-      code: data['code'],
-      original_url: data['original_url'],
-      clicks: data['clicks'],
-      expires_at: data['expires_at'],
-      updated_at: data['updated_at'],
-      created_at: data['created_at'],
+      short_url: link.short_url,
+      code: link.code,
+      original_url: link.original_url,
+      clicks: link.clicks,
+      expires_at: link.expires_at,
+      updated_at: link.updated_at,
+      created_at: link.created_at,
     };
   }
 }
