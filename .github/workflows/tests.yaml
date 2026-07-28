@@ -1,0 +1,32 @@
+name: Automated Tests
+
+on: pull_request
+
+jobs:
+  jest:
+    name: Jest Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+
+      - name: Copy .env.example to .env.development
+        run: cp -n .env.example .env.development
+
+      - name: Install Dev Containers CLI
+        run: npm install -g @devcontainers/cli
+
+      - name: Start Dev Container
+        run: devcontainer up --workspace-folder .
+
+      - name: Install dependencies
+        run: devcontainer exec --workspace-folder . npm ci
+
+      - name: Run tests inside Dev Container
+        run: devcontainer exec --workspace-folder . npm test

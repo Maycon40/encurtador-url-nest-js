@@ -26,13 +26,13 @@ async function query(queryObject) {
     await client.connect();
     const result = (await client.query(queryObject)) as QueryData;
     return result;
-  } catch (error) {
-    console.error('Erro', error);
   } finally {
     await client.end();
   }
 }
 
-export default {
+const database = {
   query,
 };
+
+export default database;
