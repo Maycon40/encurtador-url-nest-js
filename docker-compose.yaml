@@ -1,7 +1,7 @@
 services:
   postgres:
-    container_name: "postgres_encurtador"
-    image: "postgres:16.0-alpine3.18"
+    container_name: 'postgres_encurtador'
+    image: 'postgres:16.0-alpine3.18'
     env_file:
       - .env.development
 
@@ -12,4 +12,4 @@ services:
       - .:/home/node/app
     command: tail -f /dev/null
     ports:
-      - "3000:3000"
+      - '3000:3000'
