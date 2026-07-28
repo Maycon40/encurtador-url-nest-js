@@ -10,6 +10,7 @@ export default tseslint.config(
       'eslint.config.mjs',
       'src/infra/scripts/**/*.js',
       'src/infra/migrations/**/*.js',
+      'commitlint.config.js',
     ],
   },
   eslint.configs.recommended,
