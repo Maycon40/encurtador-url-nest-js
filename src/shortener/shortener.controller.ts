@@ -38,41 +38,30 @@ export class ShortenerController {
   ) {
     const url = `${req.protocol}://${req.get('host')}`;
 
-    const response = await this.shortnerService.create(
+    const createdLink = await this.shortnerService.create(
       body['original_url'],
       url,
     );
 
-    if (response.statusCode && response.statusCode >= 400) {
-      return res
-        .status(response.statusCode)
-        .json({ status_code: response.statusCode, error: response.error });
-    }
+    const statusCode = 201;
 
-    return res.status(response.statusCode).json({
-      status_code: response.statusCode,
-      code: response.code,
-      original_url: response.original_url,
-      short_url: response.short_url,
-      expires_at: response.expires_at,
-      created_at: response.created_at,
-      updated_at: response.updated_at,
+    return res.status(statusCode).json({
+      status_code: statusCode,
+      code: createdLink.code,
+      original_url: createdLink.original_url,
+      short_url: createdLink.short_url,
+      clicks: createdLink.clicks,
+      expires_at: createdLink.expires_at,
+      created_at: createdLink.created_at,
+      updated_at: createdLink.updated_at,
     });
   }
 
   @Get('/:code')
   async getShortener(@Res() res: Response, @Param() params: Code) {
-    const result = await this.shortnerService.read(params['code']);
+    const result = await this.shortnerService.getRedirectUrl(params['code']);
 
-    if (result.statusCode && result.statusCode >= 400) {
-      return res
-        .status(result.statusCode)
-        .json({ status_code: result.statusCode, error: result.error });
-    }
-
-    if (result.statusCode === 302 && result.redirect) {
-      return res.redirect(result.redirect);
-    }
+    return res.redirect(result.redirect);
   }
 
   @Put('/:code')
@@ -81,60 +70,47 @@ export class ShortenerController {
     @Body() body: CreateBody,
     @Param() params: Code,
   ) {
-    const response = await this.shortnerService.update(
-      body['original_url'],
-      params['code'],
-    );
+    const updatedLink = await this.shortnerService.update(body, params['code']);
 
-    if ((response.statusCode && response.statusCode >= 400) || response.error) {
-      return res
-        .status(response.statusCode)
-        .json({ status_code: response.statusCode, error: response.error });
-    }
+    const statusCode = 200;
 
-    return res.status(response.statusCode).json({
-      status_code: response.statusCode,
-      code: response.code,
-      original_url: response.original_url,
-      short_url: response.short_url,
+    return res.status(statusCode).json({
+      status_code: statusCode,
+      code: updatedLink.code,
+      original_url: updatedLink.original_url,
+      short_url: updatedLink.short_url,
     });
   }
 
   @Delete('/:code')
   async deleteShortener(@Res() res: Response, @Param() params: Code) {
-    const response = await this.shortnerService.delete(params['code']);
+    const deletedLink = await this.shortnerService.delete(params['code']);
 
-    if ((response.statusCode && response.statusCode >= 400) || response.error) {
-      return res
-        .status(response.statusCode)
-        .json({ status_code: response.statusCode, error: response.error });
-    }
+    const statusCode = 200;
 
-    return res.status(response.statusCode).json({
-      status_code: response.statusCode,
-      message: response.message,
+    return res.status(statusCode).json({
+      status_code: statusCode,
+      code: deletedLink.code,
+      original_url: deletedLink.original_url,
+      short_url: deletedLink.short_url,
     });
   }
 
   @Get('/statistics/:code')
   async getStatistics(@Res() res: Response, @Param() params: Code) {
-    const response = await this.shortnerService.statistics(params['code']);
+    const statistics = await this.shortnerService.statistics(params['code']);
 
-    if ((response.statusCode && response.statusCode >= 400) || response.error) {
-      return res
-        .status(response.statusCode)
-        .json({ status_code: response.statusCode, error: response.error });
-    }
+    const statusCode = 200;
 
-    return res.status(response.statusCode).json({
-      status_code: response.statusCode,
-      code: response.code,
-      original_url: response.original_url,
-      short_url: response.short_url,
-      clicks: response.clicks,
-      expires_at: response.expires_at,
-      created_at: response.created_at,
-      updated_at: response.updated_at,
+    return res.status(statusCode).json({
+      status_code: statusCode,
+      code: statistics.code,
+      original_url: statistics.original_url,
+      short_url: statistics.short_url,
+      clicks: statistics.clicks,
+      expires_at: statistics.expires_at,
+      created_at: statistics.created_at,
+      updated_at: statistics.updated_at,
     });
   }
 }
