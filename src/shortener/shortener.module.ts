@@ -21,7 +21,7 @@ export class ShortenerModule implements NestModule {
         { path: ':code', method: RequestMethod.GET },
         { path: ':code', method: RequestMethod.DELETE },
         { path: ':code', method: RequestMethod.PUT },
-        { path: 'static/:code', method: RequestMethod.GET },
+        { path: 'statistics/:code', method: RequestMethod.GET },
       );
 
     consumer
