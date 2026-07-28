@@ -1,77 +1,292 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+describe('Shortener API (e2e)', () => {
+  const baseUrl = 'http://localhost:3000';
 
-interface ShortenResponse {
-  code: string;
-  short_url: string;
-}
+  describe('POST /shorten', () => {
+    it('should return 400 when original_url is missing', async () => {
+      const res = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
 
-interface ResponseBody {
-  short_url: string;
-  original_url: string;
-  short_code: string;
-  clicks: number;
-  created_at: string;
-  expires_at: string;
-}
+      expect(res.status).toBe(400);
 
-describe('API status (e2e)', () => {
-  let app: INestApplication<App>;
-  let code = '';
+      const responseBody = await res.json();
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+      expect(responseBody).toEqual({
+        status_code: 400,
+        error: 'The param original url is required',
+      });
+    });
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    it('should return 400 when original_url is invalid', async () => {
+      const res = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'invalid-url' }),
+      });
+
+      expect(res.status).toBe(400);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 400,
+        error: 'The param original url is invalid',
+      });
+    });
+
+    it('should return 201 and shorten URL successfully', async () => {
+      const res = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.google.com' }),
+      });
+
+      expect(res.status).toBe(201);
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        code: responseBody.code,
+        original_url: 'https://www.google.com',
+        short_url: `${baseUrl}/${responseBody.code}`,
+        expires_at: responseBody.expires_at,
+        created_at: responseBody.created_at,
+        updated_at: responseBody.updated_at,
+        status_code: 201,
+      });
+    });
   });
 
-  it('/shorten (POST)', async () => {
-    await request(app.getHttpServer()).post('/shorten').expect(400);
+  describe('GET /:code', () => {
+    it('should return 404 for non-existent code', async () => {
+      const res = await fetch(`${baseUrl}/nonexistentcode123`, {
+        redirect: 'manual',
+      });
 
-    const response = await request(app.getHttpServer())
-      .post('/shorten')
-      .send({ original_url: 'https://www.google.com' })
-      .expect(201);
+      expect(res.status).toBe(404);
 
-    const responseBody = (await response.body) as ShortenResponse;
-    code = responseBody.code;
+      const responseBody = await res.json();
 
-    expect(responseBody.short_url.includes('http')).toBe(true);
+      expect(responseBody).toEqual({
+        status_code: 404,
+        error: 'Could not find shortened link!',
+      });
+    });
+
+    it('should return 302 redirect for valid code', async () => {
+      const resCode = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.google.com' }),
+      });
+
+      const createdCode = (await resCode.json()).code;
+
+      const res = await fetch(`${baseUrl}/${createdCode}`, {
+        redirect: 'manual',
+      });
+
+      expect(res.status).toBe(302);
+      expect(res.headers.get('location')).toBe('https://www.google.com');
+    });
   });
 
-  it('/:code (GET)', async () => {
-    await request(app.getHttpServer()).get(`/${code}`).expect(302);
+  describe('GET /statistics/:code', () => {
+    it('should return 404 statistics for non-existent code', async () => {
+      const res = await fetch(`${baseUrl}/statistics/nonexistentcode123`);
+
+      expect(res.status).toBe(404);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 404,
+        error: 'Could not find shortened link!',
+      });
+    });
+
+    it('should return 200 and link statistics for valid code', async () => {
+      const resCode = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.google.com' }),
+      });
+
+      const createdCode = (await resCode.json()).code;
+
+      const res = await fetch(`${baseUrl}/statistics/${createdCode}`);
+
+      expect(res.status).toBe(200);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        code: createdCode,
+        clicks: 0,
+        original_url: 'https://www.google.com',
+        short_url: `${baseUrl}/${createdCode}`,
+        status_code: 200,
+        expires_at: responseBody.expires_at,
+        created_at: responseBody.created_at,
+        updated_at: responseBody.updated_at,
+      });
+    });
   });
 
-  it('/static/:code (GET)', async () => {
-    const response = await request(app.getHttpServer())
-      .get(`/static/${code}`)
-      .expect(200);
+  describe('PUT /:code', () => {
+    it('should return 400 when original_url is missing', async () => {
+      const res = await fetch(`${baseUrl}/nonexistentcode123`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
 
-    const responseBody = (await response.body) as ResponseBody;
+      expect(res.status).toBe(400);
 
-    expect(responseBody.short_url.includes('http')).toEqual(true);
-    expect(responseBody.original_url.includes('http')).toEqual(true);
-    expect(responseBody.short_code).toBeDefined();
-    expect(responseBody.clicks).toBeGreaterThanOrEqual(0);
-    expect(responseBody.created_at).toBeDefined();
-    expect(responseBody.expires_at).toBeDefined();
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 400,
+        error: 'The param original url is required',
+      });
+    });
+
+    it('should return 400 when original_url is invalid', async () => {
+      const res = await fetch(`${baseUrl}/nonexistentcode123`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'invalid-url' }),
+      });
+
+      expect(res.status).toBe(400);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 400,
+        error: 'The param original url is invalid',
+      });
+    });
+
+    it('should return 404 when updating non-existent code', async () => {
+      const res = await fetch(`${baseUrl}/nonexistentcode123`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.github.com' }),
+      });
+
+      expect(res.status).toBe(404);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 404,
+        error: 'Could not find shortened link!',
+      });
+    });
+
+    it('should return 200 when updating existing code', async () => {
+      const resCode = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.google.com' }),
+      });
+
+      const createdCode = (await resCode.json()).code;
+
+      const res = await fetch(`${baseUrl}/${createdCode}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.github.com' }),
+      });
+
+      expect(res.status).toBe(200);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        code: createdCode,
+        original_url: 'https://www.github.com',
+        short_url: `${baseUrl}/${createdCode}`,
+        status_code: 200,
+      });
+    });
   });
 
-  it('/:code (PUT)', async () => {
-    await request(app.getHttpServer())
-      .put(`/${code}`)
-      .send({ original_url: 'https://www.google.com' })
-      .expect(200);
-  });
+  describe('DELETE /:code', () => {
+    it('should return 404 when deleting non-existent code', async () => {
+      const res = await fetch(`${baseUrl}/nonexistentcode123`, {
+        method: 'DELETE',
+      });
 
-  it('/:code (DELETE)', async () => {
-    await request(app.getHttpServer()).delete(`/${code}`).expect(200);
+      expect(res.status).toBe(404);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 404,
+        error: 'Could not find shortened link!',
+      });
+    });
+
+    it('should return 200 when deleting existing code', async () => {
+      const resCode = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.google.com' }),
+      });
+
+      const createdCode = (await resCode.json()).code;
+
+      const res = await fetch(`${baseUrl}/${createdCode}`, {
+        method: 'DELETE',
+      });
+
+      expect(res.status).toBe(200);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 200,
+        message: 'Shortened link deleted!',
+      });
+    });
+
+    it('should return 404 when trying to delete already deleted code', async () => {
+      const resCode = await fetch(`${baseUrl}/shorten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_url: 'https://www.google.com' }),
+      });
+
+      const createdCode = (await resCode.json()).code;
+
+      const res = await fetch(`${baseUrl}/${createdCode}`, {
+        method: 'DELETE',
+      });
+
+      expect(res.status).toBe(200);
+
+      const responseBody = await res.json();
+
+      expect(responseBody).toEqual({
+        status_code: 200,
+        message: 'Shortened link deleted!',
+      });
+
+      const res2 = await fetch(`${baseUrl}/${createdCode}`, {
+        method: 'DELETE',
+      });
+
+      expect(res2.status).toBe(404);
+
+      const responseBody2 = await res2.json();
+
+      expect(responseBody2).toEqual({
+        status_code: 404,
+        error: 'Could not find shortened link!',
+      });
+    });
   });
 });

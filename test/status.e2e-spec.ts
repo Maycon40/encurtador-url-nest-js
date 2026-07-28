@@ -1,9 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
-
 interface StatusResponse {
   updated_at: string;
   dependencies: {
@@ -15,25 +9,14 @@ interface StatusResponse {
 }
 
 describe('API status (e2e)', () => {
-  let app: INestApplication<App>;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
+  const baseUrl = 'http://localhost:3000';
 
   it('/api/v1/status (GET)', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/v1/status')
-      .expect(200);
+    const response = await fetch(`${baseUrl}/api/v1/status`);
 
-    const responseBody = (await response.body) as StatusResponse;
+    expect(response.status).toBe(200);
 
-    console.log('responseBody', responseBody);
+    const responseBody = (await response.json()) as StatusResponse;
 
     expect(responseBody.updated_at).toBeDefined();
     expect(responseBody.dependencies.status).toBe('online');

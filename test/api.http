@@ -1,3 +1,9 @@
+GET http://localhost:3000/NHT7qVWm
+
+###
+GET http://localhost:3000/statistics/NHT7qVWm
+
+###
 POST http://localhost:3000/shorten
 Content-Type: application/json
 
@@ -6,7 +12,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/02c45c2f
+PUT http://localhost:3000/NHT7qVWm
 Content-Type: application/json
 
 {
@@ -14,4 +20,4 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/02c45c2f
+DELETE http://localhost:3000/NHT7qVWm
