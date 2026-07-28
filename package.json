@@ -25,7 +25,8 @@
     "test": "npm run migrations:up && concurrently -n nest,jest  -k -s command-jest \"ENV_FILE=.env.development nest start\" \"wait-on http://localhost:3000 && jest --config ./test/jest-e2e.json --runInBand\"",
     "test:watch": "jest --config ./test/jest-e2e.json --watch --runInBand --verbose",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.28",
@@ -82,6 +83,24 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "main.ts",
+      ".module.ts$",
+      ".dto.ts$",
+      "src/infra/migrations/",
+      "src/infra/scripts/",
+      ".controller.ts$",
+      "database.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
   }
 }
