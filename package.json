@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prestart:dev": "cp -n .env.example .env.development || true",
     "dev": "npm run services:wait:database && npm run migrations:up && ENV_FILE=.env.development nest start --watch",
     "server": "npm run database:up && npm run dev",
     "build": "nest build",
@@ -21,7 +22,7 @@
     "lint:eslint:check": "eslint .",
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
-    "test": "concurrently -n nest,jest  -k -s command-jest \"ENV_FILE=.env.development nest start\" \"wait-on http://localhost:3000 && jest --config ./test/jest-e2e.json --runInBand\"",
+    "test": "npm run migrations:up && concurrently -n nest,jest  -k -s command-jest \"ENV_FILE=.env.development nest start\" \"wait-on http://localhost:3000 && jest --config ./test/jest-e2e.json --runInBand\"",
     "test:watch": "jest --config ./test/jest-e2e.json --watch --runInBand --verbose",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:unit": "jest"
