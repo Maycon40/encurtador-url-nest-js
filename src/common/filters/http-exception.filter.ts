@@ -5,12 +5,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import type { ArgumentsHost } from '@nestjs/common';
-import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { Response } from 'express';
 
 @Catch()
 export class SnakeCaseExceptionFilter implements ExceptionFilter {
-  @SentryExceptionCaptured()
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
