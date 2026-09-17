@@ -55,5 +55,5 @@ export default tseslint.config(
     rules: {
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
-  }
+  },
 );
