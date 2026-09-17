@@ -1,5 +1,5 @@
 const { Client } = require('pg');
-require('dotenv').config({ path: '.env.development' });
+require('dotenv').config({ path: '.env' });
 
 async function sleep(msTimeout) {
   await new Promise((resolve) => setTimeout(resolve, msTimeout));

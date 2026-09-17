@@ -1,7 +1,7 @@
 import retry from 'async-retry';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config({ path: '.env' });
 
 import database from '../src/core/database';
 import { User as UserInterface } from '../src/modules/auth/repositories/users.repository';

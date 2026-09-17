@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 import orchestrator, { baseUrl } from './orchestrator';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config({ path: '.env' });
 
 describe('Shortener API (e2e)', () => {
   beforeAll(async () => {

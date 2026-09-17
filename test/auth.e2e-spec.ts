@@ -6,7 +6,7 @@ import orchestrator, { baseUrl } from './orchestrator';
 import database from '../src/core/database';
 import password from '../src/common/utils/password.utils';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config({ path: '.env' });
 
 describe('Auth API (e2e)', () => {
   beforeAll(async () => {
