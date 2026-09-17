@@ -3,7 +3,14 @@ services:
     container_name: 'postgres_encurtador'
     image: 'postgres:16.0-alpine3.18'
     env_file:
-      - .env.development
+      - .env
+
+  mailcatcher:
+    container_name: 'mailcatcher_encurtador'
+    image: 'sj26/mailcatcher:v0.10.0'
+    ports:
+      - '1025:1025'
+      - '1080:1080'
 
   encurtador:
     image: node:24.13
