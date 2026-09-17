@@ -6,6 +6,14 @@ exports.up = (pgm) => {
       default: pgm.func('gen_random_uuid()'),
     },
 
+    user_id: {
+      type: 'uuid',
+    },
+
+    claim_token: {
+      type: 'varchar(255)',
+    },
+
     code: {
       type: 'varchar(10)',
       notNull: true,
