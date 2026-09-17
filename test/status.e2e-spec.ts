@@ -1,3 +1,5 @@
+import { baseUrl } from './orchestrator';
+
 interface StatusResponse {
   updated_at: string;
   dependencies: {
@@ -9,8 +11,6 @@ interface StatusResponse {
 }
 
 describe('API status (e2e)', () => {
-  const baseUrl = 'http://localhost:3000';
-
   it('/api/v1/status (GET)', async () => {
     const response = await fetch(`${baseUrl}/api/v1/status`);
 
