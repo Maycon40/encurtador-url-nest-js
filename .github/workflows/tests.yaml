@@ -16,8 +16,8 @@ jobs:
         with:
           node-version-file: 'package.json'
 
-      - name: Copy .env.example to .env.development
-        run: cp -n .env.example .env.development
+      - name: Copy .env.example to .env
+        run: cp -n .env.example .env
 
       - name: Install Dev Containers CLI
         run: npm install -g @devcontainers/cli
