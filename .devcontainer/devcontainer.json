@@ -12,7 +12,9 @@
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
-        "humao.rest-client"
+        "humao.rest-client",
+        "github.copilot",
+        "github.copilot-chat"
       ]
     }
   }
