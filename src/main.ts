@@ -1,21 +1,54 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { SnakeCaseExceptionFilter } from './common/filters/http-exception.filter';
+import { PerformanceAuditInterceptor } from './common/interceptors/performance-audit.interceptor';
+import { exceptionFactory } from './common/utils/exception-factory.utils';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: [process.env.FRONTEND_URL],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  });
+
+  app.useGlobalInterceptors(new PerformanceAuditInterceptor());
+
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    integrations: [nodeProfilingIntegration()],
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory,
     }),
   );
 
   app.useGlobalFilters(new SnakeCaseExceptionFilter());
+
+  const config = new DocumentBuilder()
+    .setTitle('API do Encurtador de URLs')
+    .setDescription('Documentação dos endpoints do backend')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }
