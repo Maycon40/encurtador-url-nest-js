@@ -9,10 +9,12 @@ import { ShortenerController } from './shortener.controller';
 import { ShortenerService } from './shortener.service';
 import { CodeMiddleware, UrlMiddleware } from './shortener.middleware';
 import { ShortenerRepository } from './shortener.repository';
+import { RedirectController } from './redirect.controller';
+import { UsersRepository } from 'src/modules/auth/repositories/users.repository';
 
 @Module({
-  controllers: [ShortenerController],
-  providers: [ShortenerService, ShortenerRepository],
+  controllers: [RedirectController, ShortenerController],
+  providers: [ShortenerService, ShortenerRepository, UsersRepository],
 })
 export class ShortenerModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

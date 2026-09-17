@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import database from '../infra/database';
+import database from '../../core/database';
 import { StatusService } from './status.service';
 
 jest.mock('../infra/database', () => ({

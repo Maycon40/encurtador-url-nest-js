@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ShortenerRepository, Link } from './shortener.repository';
-import database from '../infra/database';
+import database from '../../core/database';
 
 jest.mock('../infra/database', () => ({
   __esModule: true,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import database from '../infra/database';
+import database from '../../core/database';
 
 interface VersionResult {
   server_version: string;
@@ -35,7 +35,7 @@ export class StatusService {
 
     return {
       updated_at: updatedAt,
-      dependencies: {
+      database: {
         status: version ? 'online' : 'offline',
         version,
         max_connections: Number(maxConnections),
