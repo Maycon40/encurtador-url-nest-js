@@ -2,7 +2,7 @@ import { baseUrl } from './orchestrator';
 
 interface StatusResponse {
   updated_at: string;
-  dependencies: {
+  database: {
     status: string;
     version: string;
     max_connections: number;
@@ -19,9 +19,9 @@ describe('API status (e2e)', () => {
     const responseBody = (await response.json()) as StatusResponse;
 
     expect(responseBody.updated_at).toBeDefined();
-    expect(responseBody.dependencies.status).toBe('online');
-    expect(responseBody.dependencies.version.includes('16')).toBe(true);
-    expect(responseBody.dependencies.max_connections).toBe(100);
-    expect(responseBody.dependencies.used_connections).toEqual(1);
+    expect(responseBody.database.status).toBe('online');
+    expect(responseBody.database.version.includes('16')).toBe(true);
+    expect(responseBody.database.max_connections).toBe(100);
+    expect(responseBody.database.used_connections).toEqual(1);
   });
 });
