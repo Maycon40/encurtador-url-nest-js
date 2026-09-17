@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.development' });
 
 import database from '../src/core/database';
-import { User as UserInterface } from 'src/modules/auth/repositories/users.repository';
+import { User as UserInterface } from '../src/modules/auth/repositories/users.repository';
 
 export const baseUrl = 'http://localhost:3000';
 
@@ -26,7 +26,7 @@ async function waitForAllServices() {
       const response = await fetch('http://localhost:3000/api/v1/status');
 
       if (!response.ok) {
-        throw Error();
+        throw new Error();
       }
     }
   }
@@ -41,7 +41,7 @@ async function waitForAllServices() {
       const response = await fetch(emailHttpUrl);
 
       if (!response.ok) {
-        throw Error();
+        throw new Error();
       }
     }
   }
