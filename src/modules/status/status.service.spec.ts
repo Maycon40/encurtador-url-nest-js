@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import database from '../../core/database';
 import { StatusService } from './status.service';
 
-jest.mock('../infra/database', () => ({
+jest.mock('../../core/database', () => ({
   query: jest.fn(),
 }));
 

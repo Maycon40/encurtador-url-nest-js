@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ShortenerRepository, Link } from './shortener.repository';
 import database from '../../core/database';
 
-jest.mock('../infra/database', () => ({
+jest.mock('../../core/database', () => ({
   __esModule: true,
   default: {
     query: jest.fn(),
