@@ -23,6 +23,8 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
+    "strictPropertyInitialization": false,
+    "rootDir": ".",
     "allowJs": true
   }
 }
