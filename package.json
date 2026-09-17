@@ -29,14 +29,12 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.28",
-    "@nestjs/config": "^4.0.4",
-    "@nestjs/core": "^11.1.28",
-    "@nestjs/jwt": "^11.0.2",
-    "@nestjs/platform-express": "^11.1.28",
-    "@nestjs/swagger": "^11.4.7",
-    "@sentry/nestjs": "^10.69.0",
-    "@sentry/profiling-node": "^10.69.0",
+    "@nestjs/common": "^12.0.3",
+    "@nestjs/config": "^12.0.0",
+    "@nestjs/core": "^12.0.3",
+    "@nestjs/jwt": "^12.0.2",
+    "@nestjs/platform-express": "^12.0.3",
+    "@nestjs/swagger": "^12.0.1",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -50,9 +48,9 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
-    "@nestjs/schematics": "^11.0.0",
-    "@nestjs/testing": "^11.0.1",
+    "@nestjs/cli": "^12.0.3",
+    "@nestjs/schematics": "^12.0.3",
+    "@nestjs/testing": "^12.0.3",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
@@ -74,7 +72,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "^6.0.2",
     "typescript-eslint": "^8.20.0",
     "uuid": "^14.0.1",
     "wait-on": "^9.1.0"
@@ -113,5 +111,10 @@
         "statements": 80
       }
     }
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "@parcel/watcher@2.6.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }
