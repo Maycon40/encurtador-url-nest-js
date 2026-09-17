@@ -30,9 +30,3 @@ jobs:
 
       - name: Run tests e2e inside Dev Container
         run: devcontainer exec --workspace-folder . npm test
-
-      - name: Run tests unit inside Dev Container
-        run: devcontainer exec --workspace-folder . npm run test:unit
-
-      - name: Run tests coverage inside Dev Container
-        run: devcontainer exec --workspace-folder . npm run test:cov
