@@ -11,6 +11,7 @@ export default tseslint.config(
       'src/infra/scripts/**/*.js',
       'src/infra/migrations/**/*.js',
       'commitlint.config.js',
+      'jest.config.js',
     ],
   },
   eslint.configs.recommended,
