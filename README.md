@@ -10,6 +10,14 @@ API RESTful desenvolvida em NestJS para criação, gerenciamento e acompanhament
 - **NestJS** - Framework Node.js para construção de aplicações server-side eficientes e escaláveis
 - **PostgreSQL** - Banco de dados relacional para persistência dos links e estatísticas
 - **Jest** - Framework de testes em JavaScript para execução das suítes de testes automatizados
+- **Docker & Docker Compose** – Facilita o deploy e ambiente local
+- **crypto** – Para gerar códigos curtos únicos
+
+---
+
+## Versão online do projeto:
+
+Caso você queira ver o projeto em execução de forma mais rápida e facíl acesse o link: https://enc.maycon.dev.br/
 
 ---
 
